@@ -9,11 +9,15 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RegistrationAndLoginApp.Models.ViewModels;
+using RegistrationAndLoginApp.Services.BussinesLogicLayer;
 
 namespace RegistrationAndLoginApp.Controllers
 {
     public class LoginController : Controller
     {
+
+        private UserLogic _userLogic;
+
         public IActionResult Index()
         {
             return View();
@@ -34,12 +38,22 @@ namespace RegistrationAndLoginApp.Controllers
         [HttpPost]
         public IActionResult Login(UserViewModel user)
         {
-            if (!ModelState.IsValid)
-                return View(user);
+            // declare and initialize
+            bool isValidated = false;
+            UserViewModel? validateUser;
 
-            // TODO: Add authentication logic here
-
-            return RedirectToAction("Index", "Home");
+            //call the userlogic method
+            (isValidated, validateUser) = _userLogic.ValidateUserCredentials(user.Username, user.Password);
+            // if isValidated is true, redirect to success page
+            //else to the the login failure apge
+            if(isValidated)
+            {
+                return View("LoginSuccess");
+            }
+            else
+            {
+                return View("LoginFailure");
+            }
         }
     }
 }
