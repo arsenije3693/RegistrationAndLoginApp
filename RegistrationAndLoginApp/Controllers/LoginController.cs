@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RegistrationAndLoginApp.Models.ViewModels;
 using RegistrationAndLoginApp.Services.BussinesLogicLayer;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 
 public class LoginController : Controller
@@ -73,6 +74,17 @@ public class LoginController : Controller
 
     // GET: Login success page
     public IActionResult LoginSuccess()
+    {
+        return View();
+    }
+
+    /// <summary>
+    /// Members Only page available to admins and developers.
+    /// This action is protected so only users with the Admin or Developer role can access it.
+    /// </summary>
+    /// <returns>MembersOnly view</returns>
+    [Authorize(Roles = "Admin, Developer")]
+    public IActionResult MembersOnly()
     {
         return View();
     }
