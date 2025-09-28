@@ -32,6 +32,20 @@
                         </div>
                         <span asp-validation-for="Password" class="text-danger mb-2 d-block"></span>
 
+                        <!-- Phone Number -->
+                        <div class="input-group mb-3 shadow-sm rounded">
+                            <span class="input-group-text bg-primary text-white"><i class="fa-solid fa-phone"></i></span>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="Phone Number" />
+                        </div>
+                        <span asp-validation-for="PhoneNumber" class="text-danger mb-2 d-block"></span>
+
+                        <!-- Date of Birth -->
+                        <div class="input-group mb-3 shadow-sm rounded">
+                            <span class="input-group-text bg-primary text-white"><i class="fa-solid fa-calendar-days"></i></span>
+                            <input asp-for="DateOfBirth" type="date" class="form-control" />
+                        </div>
+                        <span asp-validation-for="DateOfBirth" class="text-danger mb-2 d-block"></span>
+
                         <!-- Group Membership -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Select Group</label>

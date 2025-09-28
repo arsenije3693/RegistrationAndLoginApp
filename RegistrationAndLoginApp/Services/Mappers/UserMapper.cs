@@ -62,7 +62,10 @@ namespace RegistrationAndLoginApp.Services.Mappers
                 Id = viewModel.Id,
                 Username = viewModel.Username,
                 Password = viewModel.Password,
-                Groups = domainGroups
+                Groups = domainGroups,
+               
+
+
             };
 
             // Return the mapped domain model

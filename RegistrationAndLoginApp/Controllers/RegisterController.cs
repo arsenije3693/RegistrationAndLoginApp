@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿//Arsenije Brajovic
+// CST - 350
+// 9/27/2025
+// Registration and Login - Controller
+
+using Microsoft.AspNetCore.Mvc;
 using RegistrationAndLoginApp.Models.ViewModels;
 using RegistrationAndLoginApp.Services.BussinesLogicLayer;
 
@@ -29,14 +34,24 @@ namespace RegistrationAndLoginApp.Controllers
         }
 
         // POST: Handle form submission
+        // POST: Handle form submission
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Register(UserViewModel user)
         {
+            // Reload groups in case of validation error
+            user.GroupPossibilities = _userLogic.GetAllGroups();
+
+            // Check if model is valid first
             if (!ModelState.IsValid)
             {
-                // Reload groups in case of validation error
-                user.GroupPossibilities = _userLogic.GetAllGroups();
+                return View(user);
+            }
+
+            // Check if username already exists
+            if (_userLogic.UsernameExists(user.Username))
+            {
+                ModelState.AddModelError("Username", "This username is already taken. Please choose another.");
                 return View(user);
             }
 
@@ -46,5 +61,6 @@ namespace RegistrationAndLoginApp.Controllers
             // Redirect to Home or Login page
             return RedirectToAction("Index", "Home");
         }
+
     }
 }

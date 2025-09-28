@@ -106,6 +106,24 @@ namespace RegistrationAndLoginApp.Services.BussinesLogicLayer
             return _userDAO.AddUser(domainUser);
         }
 
+        /// <summary>
+        /// Checks if a username already exists in the system
+        /// </summary>
+        /// <param name="username">The username to check</param>
+        /// <returns>True if username exists, false otherwise</returns>
+        public bool UsernameExists(string username)
+        {
+            // Null or empty check
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                return false; // Consider empty usernames as non-existing
+            }
+
+            // Use DAO to get user by username
+            var (userExists, _) = _userDAO.GetUserFromUsername(username);
+
+            return userExists;
+        }
 
     }
 }
