@@ -5,9 +5,11 @@
  * Register and Logic - Interface
  * Activity 2 - Part 1
  */
-
-
+using System.Collections.Generic;
 using RegistrationAndLoginApp.Models.DomainModels;
+
+
+
 
 namespace RegistrationAndLoginApp.Services.Interfaces
 {
@@ -21,15 +23,26 @@ namespace RegistrationAndLoginApp.Services.Interfaces
         /// <returns></returns>
         int AddUser(UserDomainModel user);
         List<GroupDomainModel> GetAllGroups();
+        
+        /// <summary>
+        /// get  a user domain mdoel based on given username 
+        /// </summary>
+   
 
 
         /// get a list of groups from the data storage
         List<GroupDomainModel>GetGroups();
 
+
+        (bool wasUserFound, UserDomainModel? foundUser) GetUserFromUsername(string userUsername);
+
+
+
     }
-}
 
+}  
 
+ 
 
 
 

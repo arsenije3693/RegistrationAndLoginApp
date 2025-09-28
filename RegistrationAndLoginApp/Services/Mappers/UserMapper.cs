@@ -68,6 +68,35 @@ namespace RegistrationAndLoginApp.Services.Mappers
             // Return the mapped domain model
             return domainModel;
         }
+
+        public static UserViewModel FromDomainModel(UserDomainModel domainUser)
+        {
+            // Declare and initialize
+            GroupViewModel viewGroup;
+            UserViewModel viewUser = new UserViewModel
+            {
+                // Map the id, username, and password
+                Id = domainUser.Id,
+                Username = domainUser.Username,
+                Password = domainUser.Password
+            };
+
+            foreach (GroupDomainModel domainGroup in domainUser.Groups)
+            {
+                // Get the view group from the GroupMapper
+                viewGroup = GroupMapper.FromDomainModel(domainGroup);
+
+                // Set the IsSelected property to true
+                viewGroup.IsSelected = true;
+
+                // Add the view group to the Possibilities list
+                viewUser.GroupPossibilities.Add(viewGroup);
+            }
+
+            // Return the viewUser
+            return viewUser;
+        }
+
     }
 }
 

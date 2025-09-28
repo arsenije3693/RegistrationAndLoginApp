@@ -53,6 +53,32 @@ namespace RegistrationAndLoginApp.Services.BussinesLogicLayer
         }
 
         /// <summary>
+        /// Validates the given username and password against the stored users.
+        /// Returns a tuple indicating whether validation succeeded and the corresponding UserViewModel (nullable).
+        /// </summary>
+        /// <param name="username">The username entered by the user</param>
+        /// <param name="password">The password entered by the user</param>
+        /// <returns>Tuple: (isValidated, UserViewModel?)</returns>
+        public (bool isValidated, UserViewModel? viewUser) ValidateUserCredentials(string username, string password)
+        {
+            UserDomainModel? domainUser;
+            UserViewModel? viewUser = null;
+            bool userExists = false, isValidated = false;
+
+            // Call DAO
+            (userExists, domainUser) = _userDAO.GetUserFromUsername(username);
+
+            // Validate password if user exists
+            if (userExists && domainUser != null && domainUser.Password == password)
+            {
+                viewUser = UserMapper.FromDomainModel(domainUser);
+                isValidated = true;
+            }
+
+            return (isValidated, viewUser);
+        }
+
+        /// <summary>
         /// Add a new user from a UserViewModel
         /// </summary>
         /// <param name="viewUser"></param>

@@ -63,5 +63,15 @@ namespace RegistrationAndLoginApp.Services.DataAccessLayer
         {
             return _users;
         }
+
+      public  (bool wasUserFound, UserDomainModel? foundUser) GetUserFromUsername(string userUsername)
+        {
+            UserDomainModel? foundUser;
+
+            foundUser = _users.FirstOrDefault(user => user.Username == userUsername, null);
+
+            return (foundUser != null, foundUser);
+        }
+
     }
 }
