@@ -9,6 +9,7 @@ using RegistrationAndLoginApp.Models.DomainModels;
 using RegistrationAndLoginApp.Models.ViewModels;
 using RegistrationAndLoginApp.Services.Interfaces;
 using RegistrationAndLoginApp.Services.Mappers;
+using RegistrationAndLoginApp.Services.Utils;
 using System;
 
 namespace RegistrationAndLoginApp.Services.BussinesLogicLayer
@@ -61,22 +62,26 @@ namespace RegistrationAndLoginApp.Services.BussinesLogicLayer
         /// <returns>Tuple: (isValidated, UserViewModel?)</returns>
         public (bool isValidated, UserViewModel? viewUser) ValidateUserCredentials(string username, string password)
         {
+            // Declare variables
             UserDomainModel? domainUser;
             UserViewModel? viewUser = null;
             bool userExists = false, isValidated = false;
 
-            // Call DAO
+            // Call the DAO method to get user by username
             (userExists, domainUser) = _userDAO.GetUserFromUsername(username);
 
-            // Validate password if user exists
-            if (userExists && domainUser != null && domainUser.Password == password)
+            // Check if user exists and validate the password using hashing
+            if (userExists && HashingHelper.VerifyPassword(password, domainUser.Password))
             {
+                // If it's a match, map the domain model to a view model
                 viewUser = UserMapper.FromDomainModel(domainUser);
                 isValidated = true;
             }
 
+            // Return validation status and the view model
             return (isValidated, viewUser);
         }
+
 
         /// <summary>
         /// Add a new user from a UserViewModel
@@ -88,7 +93,7 @@ namespace RegistrationAndLoginApp.Services.BussinesLogicLayer
         /// </returns>
         public int AddUser(UserViewModel viewUser)
         {
-            // Declare
+            // Declare a domain user
             UserDomainModel domainUser;
 
             try
@@ -98,13 +103,17 @@ namespace RegistrationAndLoginApp.Services.BussinesLogicLayer
             }
             catch (ArgumentNullException)
             {
-                // Return to show that the parameter was null
+                // Return -1 if the parameter was null
                 return -1;
             }
+
+            // Hash the user's password before saving
+            domainUser.Password = HashingHelper.HashPassword(domainUser.Password);
 
             // Send the domain model to the DAO and return the result
             return _userDAO.AddUser(domainUser);
         }
+
 
         /// <summary>
         /// Checks if a username already exists in the system
