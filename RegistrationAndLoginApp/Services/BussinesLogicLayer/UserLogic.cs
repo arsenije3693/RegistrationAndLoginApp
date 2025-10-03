@@ -19,11 +19,7 @@ namespace RegistrationAndLoginApp.Services.BussinesLogicLayer
     /// </summary>
     public class UserLogic
     {
-
-        
-
         //class level variables
-
         private IUserDAO _userDAO;
 
         /// <summary>

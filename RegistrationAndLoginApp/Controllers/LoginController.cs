@@ -1,4 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿/*
+ * Arsenije Brajovic
+ * CST-350
+ * 9/17/2025
+ * Register and Logic
+ * Activity 2 - Part 2
+ */
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
