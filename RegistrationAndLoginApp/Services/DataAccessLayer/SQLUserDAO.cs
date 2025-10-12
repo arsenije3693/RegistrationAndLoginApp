@@ -26,58 +26,84 @@ namespace RegistrationAndLoginApp.Services.DataAccessLayer
         // <inheritdoc />
         public int AddUser(UserDomainModel user)
         {
-            // declare variable
-            SqlTransaction transaction;
-            string query;
-            int newId = -1; 
+            using var connection = new SqlConnection(_connectionString);
+            connection.Open();
 
-            // create a new sql connection object
-            // using a statement to handle resource management
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using var transaction = connection.BeginTransaction();
+
+            try
             {
-                //open the connection
-                connection.Open();
-
-                // bgin a sql transaction
-                // ensures that both user and group memberships works correctly
-                // if one fails, both are cacncelled
-                transaction = connection.BeginTransaction();
-
-                // Create the query for addding a new user
-                query = "INSERT INTO Users (Username, PasswordHash)" +
+                // 1) Insert user and get the new Id
+                const string insertUserSql =
+                    "INSERT INTO Users (Username, PasswordHash) " +
                     "OUTPUT INSERTED.Id " +
                     "VALUES (@Username, @PasswordHash);";
-                // instead of hard coding values dircertly into th sql string (which can lead to sql injection), we are going to use parameter which are just placeholders
 
-
-                // select a sql command which will allow a command to run
-                // sql command a class in ADO.NET (part of the .NET framework /.NET Core LLibrary)
-                // We use to send MSQL statements to the database
-                using (SqlCommand command = new SqlCommand(query, connection, transaction))
+                int newId;
+                using (var cmd = new SqlCommand(insertUserSql, connection, transaction))
                 {
-                    // add the parameters to the command object
-                    command.Parameters.AddWithValue("@Username", user.Username);
-                    command.Parameters.AddWithValue("@PasswordHash", user.Password);
-
-                    // set up try catch for execute statement
-                    try
-                    {
-                        // ececute the query and capture the resulting int by casting result to int
-                        // ExecuteScalar runs the SQL command agains the database and returns the first column of the first row in the result set.
-                        newId = (int)command.ExecuteScalar();
-                    }
-                    catch (Exception)
-                    { 
-                        // Rollback the transaction if the query failed
-                        transaction.Rollback();
-                        return -1;
-                    }
+                    cmd.Parameters.AddWithValue("@Username", user.Username);
+                    cmd.Parameters.AddWithValue("@PasswordHash", user.Password); // assuming already hashed
+                    newId = (int)cmd.ExecuteScalar();
                 }
 
+                // 2) Insert group memberships via helper
+                if (!AddGroupMemberships(connection, transaction, newId, user.Groups))
+                {
+                    transaction.Rollback();
+                    return -1;
+                }
 
+                // 3) All good → commit
+                transaction.Commit();
+                return newId;
+            }
+            catch
+            {
+                try { transaction.Rollback(); } catch { /* ignore */ }
+                return -1;
             }
         }// end of method
 
+
+        /// <summary>
+        /// Inserts GroupMembership rows for a user inside the given SQL transaction.
+        /// Returns true if all inserts succeed; otherwise false (no commit is performed here).
+        /// </summary>
+        /// <param name="connection">An open SqlConnection.</param>
+        /// <param name="transaction">The active SqlTransaction to enlist the inserts in.</param>
+        /// <param name="userId">The Id of the user just created.</param>
+        /// <param name="groups">List of groups the user should belong to.</param>
+        private bool AddGroupMemberships(SqlConnection connection, SqlTransaction transaction, int userId, List<GroupDomainModel> groups)
+        {
+            if (groups == null || groups.Count == 0)
+                return true; // nothing to insert = success
+
+            string query =
+                "INSERT INTO GroupMemberships (UserId, GroupId) " +
+                "VALUES (@UserId, @GroupId);";
+
+            foreach (GroupDomainModel group in groups)
+            {
+                try
+                {
+                    using (SqlCommand command = new SqlCommand(query, connection, transaction))
+                    {
+                        command.Parameters.AddWithValue("@UserId", userId);
+                        command.Parameters.AddWithValue("@GroupId", group.Id); // or group.GroupId
+                        command.ExecuteNonQuery();
+                    }
+                }
+                catch
+                {
+                    // any insert failed; let caller decide to rollback
+                    return false;
+                }
+            }
+
+            // all inserts succeeded
+            return true;
+        }
 
 
         // <inheritdoc />
