@@ -9,7 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Register DAO
-builder.Services.AddSingleton<IUserDAO, LocalUserDAO>();
+
+builder.Services.AddSingleton<IUserDAO, SQLUserDAO>();
+
 
 // Register UserLogic and let DI inject IUserDAO automatically
 builder.Services.AddScoped<UserLogic>();
